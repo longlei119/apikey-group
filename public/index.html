@@ -35,7 +35,38 @@ body {
   color: var(--text);
 }
 a { color: inherit; }
+.top-right {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+.top-right .login-badge {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+}
+.top-right button {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #3d4852;
+  color: #fff;
+}
+.top-right button:hover { background: #2d3640; transform: translateY(-1px); }
+.top-right button.logout-btn {
+  background: #d97706;
+}
+.top-right button.logout-btn:hover { background: #b45309; }
 .page {
+  position: relative;
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
   padding: 20px 0 42px;
@@ -94,22 +125,6 @@ a { color: inherit; }
   background: var(--danger);
 }
 .toolbar button.danger:hover { background: var(--danger-hover); }
-.toolbar button.login-btn {
-  background: #059669;
-}
-.toolbar button.login-btn:hover { background: #047857; }
-.toolbar button.logout-btn {
-  background: #d97706;
-}
-.toolbar button.logout-btn:hover { background: #b45309; }
-.login-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #059669;
-  font-weight: 600;
-}
 .refresh-spinner {
   display: inline-block;
   width: 14px;
@@ -444,6 +459,8 @@ a { color: inherit; }
 
 @media (max-width: 640px) {
   .page { width: min(100% - 20px, 1120px); padding-top: 14px; padding-bottom: 28px; }
+  .top-right { top: 10px; right: 12px; gap: 4px; }
+  .top-right button { padding: 5px 10px; font-size: 11px; }
   .hero { padding: 14px 16px; margin-bottom: 14px; }
   .toolbar { gap: 4px; }
   .toolbar button { padding: 6px 10px; font-size: 12px; }
@@ -459,11 +476,13 @@ a { color: inherit; }
 </head>
 <body>
 <main class="page">
+  <div class="top-right" id="topRight">
+    <button id="userBtn" type="button">登录/注册</button>
+    <span class="login-badge" id="loginBadge" style="display:none"></span>
+    <button class="logout-btn" id="logoutBtn" type="button" style="display:none">退出</button>
+  </div>
   <header class="hero">
     <div class="toolbar" id="toolbar">
-      <button id="userBtn" type="button">登录/注册</button>
-      <span class="login-badge" id="loginBadge" style="display:none"></span>
-      <button class="logout-btn" id="logoutBtn" type="button" style="display:none">退出</button>
       <button class="primary" id="refreshBtn" type="button" style="display:none">立即刷新</button>
       <button id="settingsBtn" type="button" style="display:none">爬取设置</button>
       <button id="addSiteBtn" type="button" style="display:none">新增站点</button>
@@ -659,6 +678,7 @@ function updateAuthUI() {
   if (loggedIn) {
     userBtn.textContent = authUsername;
     userBtn.style.background = '#059669';
+    userBtn.style.color = '#fff';
     loginBadge.style.display = 'inline-flex';
     loginBadge.textContent = isAdmin ? '[管理员]' : '';
     logoutBtn.style.display = 'inline-block';
@@ -668,6 +688,7 @@ function updateAuthUI() {
   } else {
     userBtn.textContent = '登录/注册';
     userBtn.style.background = '#3d4852';
+    userBtn.style.color = '#fff';
     loginBadge.style.display = 'none';
     logoutBtn.style.display = 'none';
     refreshBtn.style.display = 'none';
