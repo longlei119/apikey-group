@@ -22,6 +22,8 @@
   --tag-image-text: #7e22ce;
   --tag-stable-bg: #e7f8ef;
   --tag-stable-text: #15803d;
+  --tag-testable-bg: #fef3c7;
+  --tag-testable-text: #92400e;
   --danger: #dc2626;
   --danger-hover: #b91c1c;
 }
@@ -54,11 +56,12 @@ a { color: inherit; }
   font-size: clamp(26px, 4vw, 38px);
   line-height: 1.15;
 }
-.hero p {
+.hero .subtitle {
   margin: 10px 0 0;
   line-height: 1.7;
   color: var(--muted);
   text-align: center;
+  font-size: 13px;
 }
 .toolbar {
   display: flex;
@@ -180,6 +183,10 @@ a { color: inherit; }
   transition: opacity 0.2s;
 }
 .card.disabled { opacity: 0.45; }
+.card.testable {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 1px #fbbf24, var(--shadow);
+}
 .tag-list {
   position: absolute;
   top: 14px;
@@ -209,6 +216,7 @@ a { color: inherit; }
 .tag-checkin { background: var(--tag-checkin-bg); color: var(--tag-checkin-text); }
 .tag-image  { background: var(--tag-image-bg); color: var(--tag-image-text); }
 .tag-stable { background: var(--tag-stable-bg); color: var(--tag-stable-text); }
+.tag-testable { background: var(--tag-testable-bg); color: var(--tag-testable-text); }
 .card-top { display: flex; flex-direction: column; gap: 12px; }
 .card h2 {
   margin: 0;
@@ -377,15 +385,13 @@ a { color: inherit; }
 }
 .form-status.success { color: #15803d; }
 .form-status.error   { color: #dc2626; }
-.status-bar {
+.search-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 4px;
+  margin-top: 10px;
 }
 .checkbox-row {
   display: flex;
@@ -399,6 +405,19 @@ a { color: inherit; }
   height: 16px;
   accent-color: var(--accent);
 }
+/* Admin Status bar */
+.admin-status {
+  margin: 10px 0 0;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 11px;
+  text-align: center;
+  display: none;
+}
+.admin-status.is-visible { display: block; }
+
 /* Message Board */
 .msg-panel { width: min(520px, calc(100% - 32px)); max-height: 80vh; display: flex; flex-direction: column; }
 .msg-list { flex: 1; overflow-y: auto; padding: 12px 20px; max-height: 350px; }
@@ -442,23 +461,23 @@ a { color: inherit; }
 <main class="page">
   <header class="hero">
     <div class="toolbar" id="toolbar">
-      <button id="userBtn" type="button">用户</button>
+      <button id="userBtn" type="button">登录/注册</button>
       <span class="login-badge" id="loginBadge" style="display:none"></span>
       <button class="logout-btn" id="logoutBtn" type="button" style="display:none">退出</button>
-      <button class="primary" id="refreshBtn" type="button">立即刷新</button>
-      <button id="settingsBtn" type="button">爬取设置</button>
+      <button class="primary" id="refreshBtn" type="button" style="display:none">立即刷新</button>
+      <button id="settingsBtn" type="button" style="display:none">爬取设置</button>
       <button id="addSiteBtn" type="button" style="display:none">新增站点</button>
     </div>
     <h1>公益站导航</h1>
-    <p>收录的站都可以编程、龙虾、酒馆，使用请保护个人隐私和数据安全，本站不对任何收录的中转站负责</p>
-    <div class="status-bar">
+    <p class="subtitle">可测试表示已验证可用</p>
+    <div class="search-bar">
       <input type="text" id="searchInput" placeholder="搜索名称或域名..." style="padding:6px 12px;border:1px solid var(--line);border-radius:999px;font:inherit;font-size:12px;width:200px;outline:none">
-      <span id="scrapeStatus">加载中...</span>
       <label class="checkbox-row">
         <input type="checkbox" id="hideDisabled" checked>
         隐藏不可用站点
       </label>
     </div>
+    <div class="admin-status" id="scrapeStatus"></div>
     <div class="meta-bar">
       <div class="meta" id="count"></div>
       <div class="filters" aria-label="标签筛选">
@@ -476,7 +495,7 @@ a { color: inherit; }
 <div class="overlay" id="userOverlay">
   <div class="panel">
     <div class="panel-header">
-      <h3>用户</h3>
+      <h3>登录 / 注册</h3>
       <button class="panel-close" id="userClose">&times;</button>
     </div>
     <div class="panel-body" id="userPanelBody"></div>
@@ -548,11 +567,6 @@ a { color: inherit; }
         <input type="number" id="freqInput" min="1" value="60">
         <div class="form-hint">最小 1 分钟。修改后立即生效。</div>
       </div>
-      <div class="form-group">
-        <label for="pwInput">管理员密码（登录用）</label>
-        <input type="text" id="pwInput" minlength="3" placeholder="至少3位">
-        <div class="form-hint">留空则不修改密码</div>
-      </div>
       <button class="form-submit" id="settingsSubmit" type="button">保存设置</button>
       <div class="form-status" id="settingsStatus"></div>
     </div>
@@ -613,7 +627,6 @@ const settingsClose = document.getElementById('settingsClose');
 const settingsSubmit = document.getElementById('settingsSubmit');
 const settingsStatus = document.getElementById('settingsStatus');
 const freqInput = document.getElementById('freqInput');
-const pwInput = document.getElementById('pwInput');
 const scrapeStatus = document.getElementById('scrapeStatus');
 const hideDisabledCb = document.getElementById('hideDisabled');
 const searchInput = document.getElementById('searchInput');
@@ -629,7 +642,7 @@ const siteFormStatus = document.getElementById('siteFormStatus');
 const siteTagCbs = document.querySelectorAll('.site-tag-cb');
 let editingSiteId = null;
 
-// --- Auth (unified user system) ---
+// --- Auth ---
 async function checkAuth() {
   if (!authToken) return false;
   try {
@@ -649,12 +662,16 @@ function updateAuthUI() {
     loginBadge.style.display = 'inline-flex';
     loginBadge.textContent = isAdmin ? '[管理员]' : '';
     logoutBtn.style.display = 'inline-block';
+    refreshBtn.style.display = isAdmin ? 'inline-block' : 'none';
+    settingsBtn.style.display = isAdmin ? 'inline-block' : 'none';
     addSiteBtn.style.display = isAdmin ? 'inline-block' : 'none';
   } else {
-    userBtn.textContent = '用户';
+    userBtn.textContent = '登录/注册';
     userBtn.style.background = '#3d4852';
     loginBadge.style.display = 'none';
     logoutBtn.style.display = 'none';
+    refreshBtn.style.display = 'none';
+    settingsBtn.style.display = 'none';
     addSiteBtn.style.display = 'none';
   }
   renderCards();
@@ -747,6 +764,8 @@ function renderCards() {
 
   cards.innerHTML = visible.map(site => {
     const tags = site.tags ? site.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+    // "可测试" badge: all users can see
+    if (site.testable) tags.push('可测试');
     // "源" badge: only admin can see
     if (isAdmin && !site.url_modified) tags.unshift('源');
     // "评" tag with message count (all logged-in users)
@@ -756,24 +775,27 @@ function renderCards() {
     }
     const tagsHtml = tags.map(tag => {
       if (tag === '源') return '<span class="tag-source">源</span>';
+      if (tag === '可测试') return '<span class="tag tag-testable">可测试</span>';
       if (tag.startsWith('评')) {
         const count = tag.slice(1);
         return `<span class="tag review-tag" data-id="${site.id}" data-name="${escAttr(site.name)}" style="background:#fce7f3;color:#be185d;cursor:pointer">评${count ? '('+count+')' : ''}</span>`;
       }
       return `<span class="tag ${tagClassMap[tag] || ''}">${tag}</span>`;
     }).join('');
-    const cls = site.enabled ? '' : 'disabled';
+
+    const cardCls = site.enabled ? '' : 'disabled';
+    const testableCls = site.testable ? ' testable' : '';
 
     // Admin controls
     const adminControls = isAdmin ? `
       <button class="edit-btn" data-id="${site.id}" data-url="${escAttr(site.url)}" data-name="${escAttr(site.name)}">改链</button>
       <button class="edit-btn modify-btn" data-id="${site.id}" data-name="${escAttr(site.name)}" data-url="${escAttr(site.url)}" data-tags="${escAttr(site.tags || '')}" data-note="${escAttr(site.note || '')}">修改</button>
       <button class="toggle-btn ${site.enabled ? '' : 'off'}" data-id="${site.id}" data-field="enabled" data-val="${site.enabled ? 1 : 0}">${site.enabled ? '可用' : '不可用'}</button>
-      <button class="testable-btn ${site.testable ? '' : 'off'}" data-id="${site.id}" data-field="testable" data-val="${site.testable ? 1 : 0}">${site.testable ? '可测试' : '不可测试'}</button>
+      <button class="testable-btn ${site.testable ? '' : 'off'}" data-id="${site.id}" data-field="testable" data-val="${site.testable ? 1 : 0}">${site.testable ? '已验证' : '未验证'}</button>
     ` : '';
 
     return `
-      <article class="card ${cls}">
+      <article class="card ${cardCls}${testableCls}">
         ${tagsHtml ? `<div class="tag-list">${tagsHtml}</div>` : ''}
         <div class="card-top">
           <div>
@@ -799,7 +821,7 @@ function renderCards() {
       const newVal = current ? 0 : 1;
       await fetch(`/api/sites/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
         body: JSON.stringify({ [field]: newVal })
       });
       const site = sites.find(s => s.id === id);
@@ -918,7 +940,7 @@ async function loadSites() {
     sites = await sitesRes.json();
     msgCounts = await countsRes.json();
     renderCards();
-    await updateStatus();
+    await updateAdminStatus();
   } catch {
     cards.innerHTML = '<p style="text-align:center;color:var(--muted)">加载失败，请确认后端已启动</p>';
   }
@@ -941,14 +963,19 @@ async function doRefresh() {
 }
 refreshBtn.addEventListener('click', doRefresh);
 
-// --- Status ---
-async function updateStatus() {
+// --- Admin Status (only shown when admin) ---
+async function updateAdminStatus() {
+  if (!isAdmin) {
+    scrapeStatus.classList.remove('is-visible');
+    return;
+  }
   try {
     const res = await fetch('/api/status');
     const s = await res.json();
     const last = s.last_scrape ? new Date(s.last_scrape).toLocaleString('zh-CN') : '从未爬取';
     const next = s.next_scrape ? new Date(s.next_scrape).toLocaleString('zh-CN') : '-';
-    scrapeStatus.innerHTML = `上次爬取: ${last} | 下次爬取: ${next} | 频率: ${s.scrape_frequency}分钟 | 站点: ${s.enabled}/${s.total} 可用`;
+    scrapeStatus.innerHTML = `爬取状态 · 上次: ${last} · 下次: ${next} · 频率: ${s.scrape_frequency}分钟 · 站点: ${s.enabled}/${s.total} 可用`;
+    scrapeStatus.classList.add('is-visible');
   } catch {}
 }
 
@@ -959,7 +986,6 @@ settingsBtn.addEventListener('click', async () => {
     const s = await res.json();
     freqInput.value = s.scrape_frequency;
   } catch {}
-  pwInput.value = '';
   settingsOverlay.classList.add('is-open');
 });
 settingsClose.addEventListener('click', () => settingsOverlay.classList.remove('is-open'));
@@ -968,9 +994,6 @@ settingsOverlay.addEventListener('click', (e) => {
 });
 settingsSubmit.addEventListener('click', async () => {
   const freq = Math.max(1, parseInt(freqInput.value) || 60);
-  const pw = pwInput.value.trim();
-  const body = { scrape_frequency: freq };
-  if (pw && pw.length >= 3) body.admin_password = pw;
   settingsSubmit.disabled = true;
   settingsSubmit.textContent = '保存中...';
   settingsStatus.textContent = '';
@@ -978,17 +1001,15 @@ settingsSubmit.addEventListener('click', async () => {
   try {
     const res = await fetch('/api/settings', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ scrape_frequency: freq })
     });
     const data = await res.json();
     if (data.ok) {
-      let msg = `爬取频率已更新为每 ${freq} 分钟`;
-      if (pw && pw.length >= 3) msg += '，密码已更新（所有登录已失效）';
-      settingsStatus.textContent = msg;
+      settingsStatus.textContent = `爬取频率已更新为每 ${freq} 分钟`;
       settingsStatus.className = 'form-status success';
       freqInput.value = freq;
-      updateStatus();
+      updateAdminStatus();
     }
   } catch {
     settingsStatus.textContent = '保存失败';
@@ -1045,13 +1066,11 @@ siteSubmitBtn.addEventListener('click', async () => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
     let res;
     if (editingSiteId) {
-      // Update existing
       res = await fetch(`/api/sites/${editingSiteId}`, {
         method: 'PUT', headers,
         body: JSON.stringify({ name, url, tags, note })
       });
     } else {
-      // Create new
       res = await fetch('/api/sites', {
         method: 'POST', headers,
         body: JSON.stringify({ name, url, tags, note })
@@ -1076,7 +1095,7 @@ siteSubmitBtn.addEventListener('click', async () => {
   }
 });
 
-// --- Per-Site Chat (simple nickname, no login) ---
+// --- Per-Site Chat ---
 const chatOverlay = document.getElementById('chatOverlay');
 const chatClose = document.getElementById('chatClose');
 const chatTitle = document.getElementById('chatTitle');
@@ -1166,7 +1185,7 @@ chatContent.addEventListener('keydown', (e) => { if (e.key === 'Enter') chatSend
   await loadSites();
 })();
 
-setInterval(updateStatus, 30000);
+setInterval(() => { if (isAdmin) updateAdminStatus(); }, 30000);
 </script>
 </body>
 </html>

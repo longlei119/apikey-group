@@ -218,7 +218,7 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
-app.put('/api/settings', (req, res) => {
+app.put('/api/settings', requireAdmin, (req, res) => {
   const { scrape_frequency } = req.body;
   if (scrape_frequency !== undefined) {
     const freq = Math.max(1, Number(scrape_frequency));

@@ -3,7 +3,15 @@
     "allow": [
       "Bash(npm install *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git remote *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(taskkill //f //im node)",
+      "Bash(node server.js)",
+      "Bash(timeout 3)",
+      "Read(//dev/**)",
+      "Bash(curl -s http://localhost:3456/api/status)"
     ]
   }
 }
