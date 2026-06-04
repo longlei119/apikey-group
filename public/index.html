@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>公益站导航</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f3f6fb;
+  --card: #ffffff;
+  --text: #18212f;
+  --muted: #5b6472;
+  --line: #e5eaf1;
+  --accent: #111827;
+  --accent-hover: #1f2937;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --radius: 18px;
+  --tag-checkin-bg: #e8f1ff;
+  --tag-checkin-text: #2563eb;
+  --tag-image-bg: #f3e8ff;
+  --tag-image-text: #7e22ce;
+  --tag-stable-bg: #e7f8ef;
+  --tag-stable-text: #15803d;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(180deg, #f8fafd 0%, var(--bg) 100%);
+  color: var(--text);
+}
+a { color: inherit; }
+.page {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 20px 0 42px;
+}
+.hero {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 20px 24px 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+.hero h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 1.15;
+}
+.hero p {
+  margin: 10px 0 0;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: center;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.toolbar button {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: #3d4852;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.toolbar button:hover {
+  background: #2d3640;
+  transform: translateY(-1px);
+}
+.toolbar button.primary {
+  background: #2563eb;
+}
+.toolbar button.primary:hover { background: #1d4ed8; }
+.toolbar button.danger {
+  background: var(--danger);
+}
+.toolbar button.danger:hover { background: var(--danger-hover); }
+.toolbar button.login-btn {
+  background: #059669;
+}
+.toolbar button.login-btn:hover { background: #047857; }
+.toolbar button.logout-btn {
+  background: #d97706;
+}
+.toolbar button.logout-btn:hover { background: #b45309; }
+.login-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+}
+.refresh-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.meta-bar {
+  margin: 12px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 13px;
+}
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.92);
+}
+.filter-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-button:hover, .filter-button.is-active {
+  background: var(--accent);
+  color: #fff;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 206px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  transition: opacity 0.2s;
+}
+.card.disabled { opacity: 0.45; }
+.tag-list {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+  max-width: 58%;
+}
+.tag-source {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #15803d;
+}
+.tag {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.tag-checkin { background: var(--tag-checkin-bg); color: var(--tag-checkin-text); }
+.tag-image  { background: var(--tag-image-bg); color: var(--tag-image-text); }
+.tag-stable { background: var(--tag-stable-bg); color: var(--tag-stable-text); }
+.card-top { display: flex; flex-direction: column; gap: 12px; }
+.card h2 {
+  margin: 0;
+  padding-right: 92px;
+  font-size: 20px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.domain {
+  font-size: 13px;
+  color: #64748b;
+  word-break: break-all;
+}
+.note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.button:hover { background: #0f172a; transform: translateY(-1px); }
+.edit-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fef3c7;
+  color: #92400e;
+}
+.edit-btn:hover { transform: translateY(-1px); background: #fde68a; }
+.toggle-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #dcfce7;
+  color: #15803d;
+}
+.toggle-btn.off { background: #fee2e2; color: #991b1b; }
+.toggle-btn:hover { transform: translateY(-1px); }
+.testable-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.testable-btn.off { background: #f1f5f9; color: #64748b; }
+.testable-btn:hover { transform: translateY(-1px); }
+
+/* Overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+.overlay.is-open { display: flex; }
+.panel {
+  width: min(420px, calc(100% - 32px));
+  background: var(--card);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.panel-header h3 { margin: 0; font-size: 18px; }
+.panel-close {
+  border: 0;
+  background: none;
+  font-size: 22px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.panel-close:hover { color: var(--accent); }
+.panel-body { padding: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus { border-color: var(--accent); }
+.form-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.form-submit {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.form-submit:hover:not(:disabled) { background: var(--accent-hover); }
+.form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.form-status {
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+  min-height: 18px;
+}
+.form-status.success { color: #15803d; }
+.form-status.error   { color: #dc2626; }
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+.checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+/* Message Board */
+.msg-panel { width: min(520px, calc(100% - 32px)); max-height: 80vh; display: flex; flex-direction: column; }
+.msg-list { flex: 1; overflow-y: auto; padding: 12px 20px; max-height: 350px; }
+.msg-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.msg-item:last-child { border-bottom: none; }
+.msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.msg-user { font-size: 13px; font-weight: 600; color: var(--text); }
+.msg-time { font-size: 11px; color: #94a3b8; }
+.msg-text { font-size: 14px; color: var(--text); line-height: 1.6; word-break: break-word; }
+.msg-mute-btn { border: none; border-radius: 999px; padding: 2px 8px; font-size: 10px; cursor: pointer; background: #fee2e2; color: #991b1b; }
+.msg-mute-btn.unmute { background: #dcfce7; color: #15803d; }
+.msg-auth { padding: 12px 20px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.msg-auth input { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 12px; width: 100px; outline: none; }
+.msg-auth input:focus { border-color: var(--accent); }
+.msg-auth .sm-btn { border: none; border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 12px; cursor: pointer; background: var(--accent); color: #fff; }
+.msg-auth .sm-btn:hover { background: var(--accent-hover); }
+.msg-auth .user-info { font-size: 12px; font-weight: 600; color: #059669; }
+.msg-input-row { display: flex; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--line); }
+.msg-input-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 13px; outline: none; }
+.msg-input-row input:focus { border-color: var(--accent); }
+.msg-input-row button { border: none; border-radius: 10px; padding: 8px 16px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--accent); color: #fff; white-space: nowrap; }
+.msg-input-row button:hover:not(:disabled) { background: var(--accent-hover); }
+.msg-input-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .page { width: min(100% - 20px, 1120px); padding-top: 14px; padding-bottom: 28px; }
+  .hero { padding: 14px 16px; margin-bottom: 14px; }
+  .toolbar { gap: 4px; }
+  .toolbar button { padding: 6px 10px; font-size: 12px; }
+  .meta-bar { flex-direction: column; align-items: stretch; }
+  .filters { justify-content: center; }
+  .meta { justify-content: center; }
+  .cards { grid-template-columns: 1fr; gap: 14px; }
+  .card { min-height: auto; }
+  .actions { flex-wrap: wrap; }
+  .panel { width: calc(100% - 20px); }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <div class="toolbar" id="toolbar">
+      <button id="userBtn" type="button">用户</button>
+      <span class="login-badge" id="loginBadge" style="display:none"></span>
+      <button class="logout-btn" id="logoutBtn" type="button" style="display:none">退出</button>
+      <button class="primary" id="refreshBtn" type="button">立即刷新</button>
+      <button id="settingsBtn" type="button">爬取设置</button>
+      <button id="addSiteBtn" type="button" style="display:none">新增站点</button>
+    </div>
+    <h1>公益站导航</h1>
+    <p>收录的站都可以编程、龙虾、酒馆，使用请保护个人隐私和数据安全，本站不对任何收录的中转站负责</p>
+    <div class="status-bar">
+      <input type="text" id="searchInput" placeholder="搜索名称或域名..." style="padding:6px 12px;border:1px solid var(--line);border-radius:999px;font:inherit;font-size:12px;width:200px;outline:none">
+      <span id="scrapeStatus">加载中...</span>
+      <label class="checkbox-row">
+        <input type="checkbox" id="hideDisabled" checked>
+        隐藏不可用站点
+      </label>
+    </div>
+    <div class="meta-bar">
+      <div class="meta" id="count"></div>
+      <div class="filters" aria-label="标签筛选">
+        <button class="filter-button is-active" type="button" data-filter="全部">全部</button>
+        <button class="filter-button" type="button" data-filter="签到">签到</button>
+        <button class="filter-button" type="button" data-filter="生图">生图</button>
+        <button class="filter-button" type="button" data-filter="稳定">稳定</button>
+      </div>
+    </div>
+  </header>
+  <section class="cards" id="cards" aria-label="站点列表"></section>
+</main>
+
+<!-- User Auth Overlay -->
+<div class="overlay" id="userOverlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3>用户</h3>
+      <button class="panel-close" id="userClose">&times;</button>
+    </div>
+    <div class="panel-body" id="userPanelBody"></div>
+  </div>
+</div>
+
+<!-- URL Edit Overlay -->
+<div class="overlay" id="urlOverlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3>修改跳转链接</h3>
+      <button class="panel-close" id="urlClose">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label id="urlEditLabel">链接地址</label>
+        <input type="url" id="urlInput" placeholder="https://...">
+      </div>
+      <button class="form-submit" id="urlSubmit" type="button">保存</button>
+      <div class="form-status" id="urlStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Site Add/Edit Overlay -->
+<div class="overlay" id="siteOverlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3 id="siteOverlayTitle">新增站点</h3>
+      <button class="panel-close" id="siteClose">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label>名称</label>
+        <input type="text" id="siteName" placeholder="站点名称">
+      </div>
+      <div class="form-group">
+        <label>链接</label>
+        <input type="url" id="siteUrl" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>标签</label>
+        <div class="checkbox-row" style="gap:16px;flex-wrap:wrap">
+          <label class="checkbox-row"><input type="checkbox" value="签到" class="site-tag-cb"> 签到</label>
+          <label class="checkbox-row"><input type="checkbox" value="生图" class="site-tag-cb"> 生图</label>
+          <label class="checkbox-row"><input type="checkbox" value="稳定" class="site-tag-cb"> 稳定</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <input type="text" id="siteNote" placeholder="备注说明">
+      </div>
+      <button class="form-submit" id="siteSubmit" type="button">保存</button>
+      <div class="form-status" id="siteFormStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Overlay -->
+<div class="overlay" id="settingsOverlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h3>爬取设置</h3>
+      <button class="panel-close" id="settingsClose">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="freqInput">爬取频率（分钟）</label>
+        <input type="number" id="freqInput" min="1" value="60">
+        <div class="form-hint">最小 1 分钟。修改后立即生效。</div>
+      </div>
+      <div class="form-group">
+        <label for="pwInput">管理员密码（登录用）</label>
+        <input type="text" id="pwInput" minlength="3" placeholder="至少3位">
+        <div class="form-hint">留空则不修改密码</div>
+      </div>
+      <button class="form-submit" id="settingsSubmit" type="button">保存设置</button>
+      <div class="form-status" id="settingsStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Per-Site Chat Overlay -->
+<div class="overlay" id="chatOverlay">
+  <div class="panel msg-panel">
+    <div class="panel-header">
+      <h3 id="chatTitle">留言板</h3>
+      <button class="panel-close" id="chatClose">&times;</button>
+    </div>
+    <div class="msg-list" id="chatList"><p style="color:var(--muted);text-align:center;font-size:13px">加载中...</p></div>
+    <div class="msg-input-row" id="chatInputRow">
+      <input type="text" id="chatContent" placeholder="说点什么...（最多500字）" maxlength="500">
+      <button id="chatSendBtn">发送</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tagClassMap = {
+  签到: 'tag-checkin',
+  生图: 'tag-image',
+  稳定: 'tag-stable',
+};
+
+let sites = [];
+let activeFilter = '全部';
+let hideDisabled = true;
+let searchQuery = '';
+let authToken = localStorage.getItem('auth_token') || '';
+let loggedIn = false;
+let isAdmin = false;
+let authUsername = '';
+
+// --- Elements ---
+const cards = document.getElementById('cards');
+const count = document.getElementById('count');
+const filterButtons = document.querySelectorAll('.filter-button');
+const refreshBtn = document.getElementById('refreshBtn');
+const userBtn = document.getElementById('userBtn');
+const loginBadge = document.getElementById('loginBadge');
+const logoutBtn = document.getElementById('logoutBtn');
+const userOverlay = document.getElementById('userOverlay');
+const userClose = document.getElementById('userClose');
+const userPanelBody = document.getElementById('userPanelBody');
+const urlOverlay = document.getElementById('urlOverlay');
+const urlClose = document.getElementById('urlClose');
+const urlSubmitBtn = document.getElementById('urlSubmit');
+const urlInput = document.getElementById('urlInput');
+const urlEditLabel = document.getElementById('urlEditLabel');
+const urlStatus = document.getElementById('urlStatus');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsClose = document.getElementById('settingsClose');
+const settingsSubmit = document.getElementById('settingsSubmit');
+const settingsStatus = document.getElementById('settingsStatus');
+const freqInput = document.getElementById('freqInput');
+const pwInput = document.getElementById('pwInput');
+const scrapeStatus = document.getElementById('scrapeStatus');
+const hideDisabledCb = document.getElementById('hideDisabled');
+const searchInput = document.getElementById('searchInput');
+const addSiteBtn = document.getElementById('addSiteBtn');
+const siteOverlay = document.getElementById('siteOverlay');
+const siteClose = document.getElementById('siteClose');
+const siteOverlayTitle = document.getElementById('siteOverlayTitle');
+const siteName = document.getElementById('siteName');
+const siteUrl = document.getElementById('siteUrl');
+const siteNote = document.getElementById('siteNote');
+const siteSubmitBtn = document.getElementById('siteSubmit');
+const siteFormStatus = document.getElementById('siteFormStatus');
+const siteTagCbs = document.querySelectorAll('.site-tag-cb');
+let editingSiteId = null;
+
+// --- Auth (unified user system) ---
+async function checkAuth() {
+  if (!authToken) return false;
+  try {
+    const res = await fetch('/api/user/me', { headers: { 'Authorization': `Bearer ${authToken}` } });
+    if (!res.ok) return false;
+    const d = await res.json();
+    authUsername = d.username;
+    isAdmin = d.isAdmin;
+    return true;
+  } catch { return false; }
+}
+
+function updateAuthUI() {
+  if (loggedIn) {
+    userBtn.textContent = authUsername;
+    userBtn.style.background = '#059669';
+    loginBadge.style.display = 'inline-flex';
+    loginBadge.textContent = isAdmin ? '[管理员]' : '';
+    logoutBtn.style.display = 'inline-block';
+    addSiteBtn.style.display = isAdmin ? 'inline-block' : 'none';
+  } else {
+    userBtn.textContent = '用户';
+    userBtn.style.background = '#3d4852';
+    loginBadge.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    addSiteBtn.style.display = 'none';
+  }
+  renderCards();
+}
+
+function renderUserPanel() {
+  if (loggedIn) {
+    userPanelBody.innerHTML = `
+      <p style="text-align:center;color:#059669;font-weight:600">${escHtml(authUsername)} ${isAdmin ? '[管理员]' : ''}</p>
+      <button class="form-submit" id="userLogoutBtn" style="background:#94a3b8">退出登录</button>`;
+    document.getElementById('userLogoutBtn').addEventListener('click', () => {
+      authToken = ''; loggedIn = false; isAdmin = false; authUsername = '';
+      localStorage.removeItem('auth_token');
+      updateAuthUI(); renderUserPanel();
+      userOverlay.classList.remove('is-open');
+    });
+  } else {
+    userPanelBody.innerHTML = `
+      <div class="form-group"><label>用户名</label><input type="text" id="userNameInput" placeholder="2-20个字符"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="userPwInput" placeholder="至少3位"></div>
+      <div style="display:flex;gap:8px">
+        <button class="form-submit" id="userLoginBtn2" type="button" style="flex:1">登录</button>
+        <button class="form-submit" id="userRegBtn2" type="button" style="flex:1;background:#64748b">注册</button>
+      </div>
+      <div class="form-status" id="userFormStatus"></div>`;
+    document.getElementById('userLoginBtn2').addEventListener('click', async () => {
+      const u = document.getElementById('userNameInput').value.trim();
+      const p = document.getElementById('userPwInput').value.trim();
+      const st = document.getElementById('userFormStatus');
+      if (!u || !p) { st.textContent='请填写完整'; st.className='form-status error'; return; }
+      try {
+        const res = await fetch('/api/user/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u,password:p}) });
+        const d = await res.json();
+        if (d.ok) {
+          authToken = d.token; loggedIn = true; isAdmin = d.isAdmin; authUsername = d.username;
+          localStorage.setItem('auth_token', authToken);
+          st.textContent='登录成功'; st.className='form-status success';
+          updateAuthUI(); renderUserPanel();
+          setTimeout(() => userOverlay.classList.remove('is-open'), 600);
+        } else { st.textContent=d.error; st.className='form-status error'; }
+      } catch { st.textContent='网络错误'; st.className='form-status error'; }
+    });
+    document.getElementById('userRegBtn2').addEventListener('click', async () => {
+      const u = document.getElementById('userNameInput').value.trim();
+      const p = document.getElementById('userPwInput').value.trim();
+      const st = document.getElementById('userFormStatus');
+      if (!u || !p) { st.textContent='请填写完整'; st.className='form-status error'; return; }
+      try {
+        const res = await fetch('/api/user/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u,password:p}) });
+        const d = await res.json();
+        if (d.ok) { st.textContent='注册成功，请登录'; st.className='form-status success'; }
+        else { st.textContent=d.error; st.className='form-status error'; }
+      } catch { st.textContent='网络错误'; st.className='form-status error'; }
+    });
+  }
+}
+
+userBtn.addEventListener('click', () => { renderUserPanel(); userOverlay.classList.add('is-open'); });
+userClose.addEventListener('click', () => userOverlay.classList.remove('is-open'));
+userOverlay.addEventListener('click', e => { if (e.target===userOverlay) userOverlay.classList.remove('is-open'); });
+
+logoutBtn.addEventListener('click', () => {
+  authToken = ''; loggedIn = false; isAdmin = false; authUsername = '';
+  localStorage.removeItem('auth_token');
+  updateAuthUI();
+});
+
+// --- Render ---
+function renderCards() {
+  let visible = hideDisabled ? sites.filter(s => s.enabled) : sites;
+
+  if (activeFilter !== '全部') {
+    visible = visible.filter(s => {
+      const tags = s.tags ? s.tags.split(',').map(t => t.trim()) : [];
+      return tags.includes(activeFilter);
+    });
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    visible = visible.filter(s =>
+      (s.name && s.name.toLowerCase().includes(q)) ||
+      (s.domain && s.domain.toLowerCase().includes(q))
+    );
+  }
+
+  count.textContent = activeFilter === '全部'
+    ? `共收录 ${visible.length} 个站点`
+    : `${activeFilter}：${visible.length} 个站点`;
+
+  cards.innerHTML = visible.map(site => {
+    const tags = site.tags ? site.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+    // "源" badge: only admin can see
+    if (isAdmin && !site.url_modified) tags.unshift('源');
+    // "评" tag with message count (all logged-in users)
+    if (loggedIn) {
+      const chatCount = msgCounts[site.id] || 0;
+      tags.push('评' + (chatCount > 0 ? chatCount : ''));
+    }
+    const tagsHtml = tags.map(tag => {
+      if (tag === '源') return '<span class="tag-source">源</span>';
+      if (tag.startsWith('评')) {
+        const count = tag.slice(1);
+        return `<span class="tag review-tag" data-id="${site.id}" data-name="${escAttr(site.name)}" style="background:#fce7f3;color:#be185d;cursor:pointer">评${count ? '('+count+')' : ''}</span>`;
+      }
+      return `<span class="tag ${tagClassMap[tag] || ''}">${tag}</span>`;
+    }).join('');
+    const cls = site.enabled ? '' : 'disabled';
+
+    // Admin controls
+    const adminControls = isAdmin ? `
+      <button class="edit-btn" data-id="${site.id}" data-url="${escAttr(site.url)}" data-name="${escAttr(site.name)}">改链</button>
+      <button class="edit-btn modify-btn" data-id="${site.id}" data-name="${escAttr(site.name)}" data-url="${escAttr(site.url)}" data-tags="${escAttr(site.tags || '')}" data-note="${escAttr(site.note || '')}">修改</button>
+      <button class="toggle-btn ${site.enabled ? '' : 'off'}" data-id="${site.id}" data-field="enabled" data-val="${site.enabled ? 1 : 0}">${site.enabled ? '可用' : '不可用'}</button>
+      <button class="testable-btn ${site.testable ? '' : 'off'}" data-id="${site.id}" data-field="testable" data-val="${site.testable ? 1 : 0}">${site.testable ? '可测试' : '不可测试'}</button>
+    ` : '';
+
+    return `
+      <article class="card ${cls}">
+        ${tagsHtml ? `<div class="tag-list">${tagsHtml}</div>` : ''}
+        <div class="card-top">
+          <div>
+            <h2>${escHtml(site.name)}</h2>
+            <div class="domain">${escHtml(site.domain)}</div>
+          </div>
+          <p class="note">${escHtml(site.note)}</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="${escHtml(site.url)}" target="_blank" rel="noopener noreferrer">打开链接</a>
+          ${adminControls}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  // Bind toggle buttons (enabled/testable)
+  cards.querySelectorAll('.toggle-btn, .testable-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = Number(btn.dataset.id);
+      const field = btn.dataset.field;
+      const current = Number(btn.dataset.val);
+      const newVal = current ? 0 : 1;
+      await fetch(`/api/sites/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: newVal })
+      });
+      const site = sites.find(s => s.id === id);
+      if (site) site[field] = newVal;
+      renderCards();
+    });
+  });
+
+  // Bind edit URL buttons (改链)
+  cards.querySelectorAll('.edit-btn:not(.modify-btn)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      editingSiteId = Number(btn.dataset.id);
+      urlEditLabel.textContent = `修改「${btn.dataset.name}」的跳转链接`;
+      urlInput.value = btn.dataset.url;
+      urlStatus.textContent = '';
+      urlStatus.className = 'form-status';
+      urlOverlay.classList.add('is-open');
+    });
+  });
+
+  // Bind chat tags
+  cards.querySelectorAll('.review-tag').forEach(tag => {
+    tag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openChat(Number(tag.dataset.id), tag.dataset.name);
+    });
+  });
+
+  // Bind modify buttons (修改)
+  cards.querySelectorAll('.modify-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      editingSiteId = Number(btn.dataset.id);
+      siteOverlayTitle.textContent = `修改「${btn.dataset.name}」`;
+      siteName.value = btn.dataset.name;
+      siteUrl.value = btn.dataset.url;
+      siteNote.value = btn.dataset.note;
+      const siteTags = (btn.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+      siteTagCbs.forEach(cb => { cb.checked = siteTags.includes(cb.value); });
+      siteFormStatus.textContent = '';
+      siteFormStatus.className = 'form-status';
+      siteOverlay.classList.add('is-open');
+    });
+  });
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// --- URL Edit Overlay ---
+urlClose.addEventListener('click', () => urlOverlay.classList.remove('is-open'));
+urlOverlay.addEventListener('click', (e) => {
+  if (e.target === urlOverlay) urlOverlay.classList.remove('is-open');
+});
+urlSubmitBtn.addEventListener('click', async () => {
+  const url = urlInput.value.trim();
+  if (!url || !url.startsWith('http')) {
+    urlStatus.textContent = '请输入有效的链接（http/https开头）';
+    urlStatus.className = 'form-status error';
+    return;
+  }
+  urlSubmitBtn.disabled = true;
+  urlSubmitBtn.textContent = '保存中...';
+  try {
+    const res = await fetch(`/api/sites/${editingSiteId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const site = sites.find(s => s.id === editingSiteId);
+      if (site) { site.url = url; site.url_modified = 1; }
+      urlStatus.textContent = '链接已更新';
+      urlStatus.className = 'form-status success';
+      renderCards();
+      setTimeout(() => urlOverlay.classList.remove('is-open'), 800);
+    } else {
+      urlStatus.textContent = data.error || '保存失败';
+      urlStatus.className = 'form-status error';
+    }
+  } catch {
+    urlStatus.textContent = '网络错误';
+    urlStatus.className = 'form-status error';
+  } finally {
+    urlSubmitBtn.disabled = false;
+    urlSubmitBtn.textContent = '保存';
+  }
+});
+
+// --- Filters ---
+filterButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    filterButtons.forEach(b => b.classList.toggle('is-active', b === btn));
+    renderCards();
+  });
+});
+
+// --- Load ---
+async function loadSites() {
+  try {
+    const q = hideDisabled ? '' : '?hide_disabled=false';
+    const [sitesRes, countsRes] = await Promise.all([
+      fetch(`/api/sites${q}`),
+      fetch('/api/message-counts')
+    ]);
+    sites = await sitesRes.json();
+    msgCounts = await countsRes.json();
+    renderCards();
+    await updateStatus();
+  } catch {
+    cards.innerHTML = '<p style="text-align:center;color:var(--muted)">加载失败，请确认后端已启动</p>';
+  }
+}
+
+// --- Refresh ---
+async function doRefresh() {
+  refreshBtn.disabled = true;
+  refreshBtn.innerHTML = '<span class="refresh-spinner"></span>刷新中...';
+  try {
+    const res = await fetch('/api/sites/refresh', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) await loadSites();
+  } catch (e) {
+    alert('刷新失败: ' + e.message);
+  } finally {
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = '立即刷新';
+  }
+}
+refreshBtn.addEventListener('click', doRefresh);
+
+// --- Status ---
+async function updateStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const s = await res.json();
+    const last = s.last_scrape ? new Date(s.last_scrape).toLocaleString('zh-CN') : '从未爬取';
+    const next = s.next_scrape ? new Date(s.next_scrape).toLocaleString('zh-CN') : '-';
+    scrapeStatus.innerHTML = `上次爬取: ${last} | 下次爬取: ${next} | 频率: ${s.scrape_frequency}分钟 | 站点: ${s.enabled}/${s.total} 可用`;
+  } catch {}
+}
+
+// --- Settings ---
+settingsBtn.addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/settings');
+    const s = await res.json();
+    freqInput.value = s.scrape_frequency;
+  } catch {}
+  pwInput.value = '';
+  settingsOverlay.classList.add('is-open');
+});
+settingsClose.addEventListener('click', () => settingsOverlay.classList.remove('is-open'));
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) settingsOverlay.classList.remove('is-open');
+});
+settingsSubmit.addEventListener('click', async () => {
+  const freq = Math.max(1, parseInt(freqInput.value) || 60);
+  const pw = pwInput.value.trim();
+  const body = { scrape_frequency: freq };
+  if (pw && pw.length >= 3) body.admin_password = pw;
+  settingsSubmit.disabled = true;
+  settingsSubmit.textContent = '保存中...';
+  settingsStatus.textContent = '';
+  settingsStatus.className = 'form-status';
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      let msg = `爬取频率已更新为每 ${freq} 分钟`;
+      if (pw && pw.length >= 3) msg += '，密码已更新（所有登录已失效）';
+      settingsStatus.textContent = msg;
+      settingsStatus.className = 'form-status success';
+      freqInput.value = freq;
+      updateStatus();
+    }
+  } catch {
+    settingsStatus.textContent = '保存失败';
+    settingsStatus.className = 'form-status error';
+  } finally {
+    settingsSubmit.disabled = false;
+    settingsSubmit.textContent = '保存设置';
+  }
+});
+
+// --- Search ---
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.trim();
+  renderCards();
+});
+
+// --- Hide disabled ---
+hideDisabledCb.addEventListener('change', () => {
+  hideDisabled = hideDisabledCb.checked;
+  renderCards();
+});
+
+// --- Site Add/Edit Overlay ---
+addSiteBtn.addEventListener('click', () => {
+  editingSiteId = null;
+  siteOverlayTitle.textContent = '新增站点';
+  siteName.value = '';
+  siteUrl.value = '';
+  siteNote.value = '';
+  siteTagCbs.forEach(cb => { cb.checked = false; });
+  siteFormStatus.textContent = '';
+  siteFormStatus.className = 'form-status';
+  siteOverlay.classList.add('is-open');
+});
+
+siteClose.addEventListener('click', () => siteOverlay.classList.remove('is-open'));
+siteOverlay.addEventListener('click', (e) => {
+  if (e.target === siteOverlay) siteOverlay.classList.remove('is-open');
+});
+
+siteSubmitBtn.addEventListener('click', async () => {
+  const name = siteName.value.trim();
+  const url = siteUrl.value.trim();
+  if (!name || !url) { siteFormStatus.textContent = '名称和链接不能为空'; siteFormStatus.className = 'form-status error'; return; }
+  if (!url.startsWith('http')) { siteFormStatus.textContent = '链接需以 http 开头'; siteFormStatus.className = 'form-status error'; return; }
+
+  const tags = Array.from(siteTagCbs).filter(cb => cb.checked).map(cb => cb.value).join(',');
+  const note = siteNote.value.trim();
+
+  siteSubmitBtn.disabled = true;
+  siteSubmitBtn.textContent = '保存中...';
+
+  try {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+    let res;
+    if (editingSiteId) {
+      // Update existing
+      res = await fetch(`/api/sites/${editingSiteId}`, {
+        method: 'PUT', headers,
+        body: JSON.stringify({ name, url, tags, note })
+      });
+    } else {
+      // Create new
+      res = await fetch('/api/sites', {
+        method: 'POST', headers,
+        body: JSON.stringify({ name, url, tags, note })
+      });
+    }
+    const data = await res.json();
+    if (data.ok) {
+      siteFormStatus.textContent = editingSiteId ? '站点已更新' : '站点已新增';
+      siteFormStatus.className = 'form-status success';
+      await loadSites();
+      setTimeout(() => siteOverlay.classList.remove('is-open'), 800);
+    } else {
+      siteFormStatus.textContent = data.error || '保存失败';
+      siteFormStatus.className = 'form-status error';
+    }
+  } catch {
+    siteFormStatus.textContent = '网络错误';
+    siteFormStatus.className = 'form-status error';
+  } finally {
+    siteSubmitBtn.disabled = false;
+    siteSubmitBtn.textContent = '保存';
+  }
+});
+
+// --- Per-Site Chat (simple nickname, no login) ---
+const chatOverlay = document.getElementById('chatOverlay');
+const chatClose = document.getElementById('chatClose');
+const chatTitle = document.getElementById('chatTitle');
+const chatList = document.getElementById('chatList');
+const chatInputRow = document.getElementById('chatInputRow');
+const chatContent = document.getElementById('chatContent');
+const chatSendBtn = document.getElementById('chatSendBtn');
+let chatSiteId = null;
+let msgCounts = {};
+
+async function loadMsgCounts() {
+  try { const res = await fetch('/api/message-counts'); msgCounts = await res.json(); } catch { msgCounts = {}; }
+}
+
+function openChat(siteId, siteName) {
+  chatSiteId = siteId;
+  chatTitle.textContent = `评论 - ${siteName}`;
+  chatContent.value = '';
+  chatInputRow.style.display = loggedIn ? 'flex' : 'none';
+  loadChatMessages();
+  chatOverlay.classList.add('is-open');
+}
+
+async function loadChatMessages() {
+  try {
+    const res = await fetch(`/api/messages/${chatSiteId}`);
+    const msgs = await res.json();
+    if (msgs.length === 0) {
+      chatList.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px">暂无评论</p>';
+      return;
+    }
+    chatList.innerHTML = msgs.map(m => {
+      const muteBtn = isAdmin
+        ? `<button class="msg-mute-btn msg-mute-usr" data-username="${escAttr(m.username)}">禁言</button>`
+        : '';
+      const time = new Date(m.created_at + 'Z').toLocaleString('zh-CN');
+      return `<div class="msg-item">
+        <div class="msg-meta"><span class="msg-user">${escHtml(m.username)}</span><span class="msg-time">${time}</span>${muteBtn}</div>
+        <div class="msg-text">${escHtml(m.content)}</div>
+      </div>`;
+    }).join('');
+
+    chatList.querySelectorAll('.msg-mute-usr').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(`确定要禁言「${btn.dataset.username}」吗？`)) return;
+        try {
+          await fetch('/api/users/mute-by-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ username: btn.dataset.username })
+          });
+          alert(`已禁言「${btn.dataset.username}」`);
+          loadChatMessages();
+        } catch { alert('操作失败'); }
+      });
+    });
+  } catch { chatList.innerHTML = '<p style="color:var(--muted);text-align:center;font-size:13px">加载失败</p>'; }
+}
+
+chatClose.addEventListener('click', () => chatOverlay.classList.remove('is-open'));
+chatOverlay.addEventListener('click', (e) => { if (e.target === chatOverlay) chatOverlay.classList.remove('is-open'); });
+
+chatSendBtn.addEventListener('click', async () => {
+  if (!loggedIn) { alert('请先登录'); return; }
+  const content = chatContent.value.trim();
+  if (!content) return;
+
+  chatSendBtn.disabled = true; chatSendBtn.textContent = '发送中...';
+  try {
+    const res = await fetch(`/api/messages/${chatSiteId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ content })
+    });
+    const d = await res.json();
+    if (d.ok) { chatContent.value = ''; loadChatMessages(); loadMsgCounts().then(renderCards); }
+    else { alert(d.error); }
+  } catch { alert('网络错误'); }
+  finally { chatSendBtn.disabled = false; chatSendBtn.textContent = '发送'; }
+});
+chatContent.addEventListener('keydown', (e) => { if (e.key === 'Enter') chatSendBtn.click(); });
+
+// --- Init ---
+(async () => {
+  loggedIn = await checkAuth();
+  updateAuthUI();
+  await loadSites();
+})();
+
+setInterval(updateStatus, 30000);
+</script>
+</body>
+</html>
